@@ -29,7 +29,7 @@ export default function HomePage() {
 
       if (!response.ok) {
         const data = await response.json()
-        if (response.status === 500 && data.error?.includes('GEMINI_API_KEY')) {
+        if (response.status === 500 && data.error?.includes('DEEPSEEK_API_KEY')) {
           setApiKeyMissing(true)
         } else {
           setError(data.error ?? 'Unknown error')
@@ -142,7 +142,7 @@ export default function HomePage() {
   const showToolbar = paragraphs.length > 0 || loading
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8">
+    <main className="w-full px-8 py-8 max-w-screen-2xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">MD Translator</h1>
       <p className="text-gray-500 text-sm mb-6">English → Chinese, paragraph by paragraph</p>
 

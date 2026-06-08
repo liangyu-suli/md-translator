@@ -1,5 +1,5 @@
 import { Paragraph } from './markdown'
-import { translateParagraph } from './gemini'
+import { translateParagraph } from './translator'
 
 export interface TranslationResult {
   index: number

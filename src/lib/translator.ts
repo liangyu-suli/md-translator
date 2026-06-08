@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 
 const PROMPT_PREFIX =
   'Translate the following English text to Chinese. ' +
@@ -7,8 +7,10 @@ const PROMPT_PREFIX =
   'Return only the Chinese translation, no explanation.\n\n'
 
 export async function translateParagraph(text: string, apiKey: string): Promise<string> {
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' })
-  const result = await model.generateContent(PROMPT_PREFIX + text)
-  return result.response.text().trim()
+  const client = new OpenAI({ apiKey, baseURL: 'https://api.deepseek.com' })
+  const response = await client.chat.completions.create({
+    model: 'deepseek-v4-flash',
+    messages: [{ role: 'user', content: PROMPT_PREFIX + text }],
+  })
+  return response.choices[0].message.content?.trim() ?? ''
 }

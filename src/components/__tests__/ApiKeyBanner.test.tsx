@@ -11,6 +11,6 @@ test('renders nothing when missing=false', () => {
 
 test('renders banner with setup instructions when missing=true', () => {
   render(<ApiKeyBanner missing={true} />)
-  expect(screen.getByText(/GEMINI_API_KEY is not set/i)).toBeInTheDocument()
+  expect(screen.getByText(/DEEPSEEK_API_KEY is not set/i)).toBeInTheDocument()
   expect(screen.getByText(/\.env\.local/i)).toBeInTheDocument()
 })

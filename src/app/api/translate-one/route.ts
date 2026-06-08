@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server'
-import { translateParagraph } from '@/lib/gemini'
+import { translateParagraph } from '@/lib/translator'
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.DEEPSEEK_API_KEY
   if (!apiKey) {
-    return Response.json({ error: 'GEMINI_API_KEY not set' }, { status: 500 })
+    return Response.json({ error: 'DEEPSEEK_API_KEY not set' }, { status: 500 })
   }
 
   let body: { en?: string }

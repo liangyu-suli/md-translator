@@ -1,6 +1,6 @@
 # MD Translator
 
-A local web app that reads a markdown file by path, stores it, and displays English-Chinese parallel translations paragraph by paragraph using Gemini.
+A local web app that reads a markdown file by path, stores it, and displays English-Chinese parallel translations paragraph by paragraph using DeepSeek.
 
 ## Workflow Requirements
 
@@ -11,14 +11,14 @@ A local web app that reads a markdown file by path, stores it, and displays Engl
 
 - **Framework**: Next.js 16 (App Router), TypeScript
 - **Styling**: Tailwind CSS
-- **Translation**: Gemini API (`gemini-3.1-flash-lite`) via `@google/generative-ai`
+- **Translation**: DeepSeek API (`deepseek-v4-flash`) via `openai` (OpenAI-compatible)
 - **Cache**: Disk-based JSON in `translations/` dir, keyed by SHA-256 hash
 - **Testing**: Jest + @testing-library/react
 
 ## Key Behaviors
 
 - User inputs a local file path; the app reads and stores the markdown
-- Each paragraph is translated EN→ZH using Gemini flash-lite
+- Each paragraph is translated EN→ZH using DeepSeek v4 flash
 - Tech jargon and terms are preserved unchanged
 - EN and ZH are displayed side by side per paragraph
 - Runs locally

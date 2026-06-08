@@ -1,7 +1,7 @@
 import { translateParagraphs, TranslationResult } from '../translate'
 import { Paragraph } from '../markdown'
 
-jest.mock('../gemini', () => ({
+jest.mock('../translator', () => ({
   translateParagraph: jest.fn().mockImplementation((text: string) =>
     Promise.resolve(`ZH:${text}`)
   ),
@@ -32,7 +32,7 @@ test('passes shouldTranslate=false paragraphs through unchanged (zh = en)', asyn
 })
 
 test('captures per-paragraph errors without throwing', async () => {
-  const { translateParagraph } = require('../gemini')
+  const { translateParagraph } = require('../translator')
   translateParagraph.mockRejectedValueOnce(new Error('quota'))
 
   const paragraphs: Paragraph[] = [
