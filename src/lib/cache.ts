@@ -13,7 +13,9 @@ export interface CacheEntry {
   createdAt: string
 }
 
-const DEFAULT_CACHE_DIR = path.join(process.cwd(), 'translations')
+const DEFAULT_CACHE_DIR = process.env.VERCEL
+  ? '/tmp/translations'
+  : path.join(process.cwd(), 'translations')
 
 export async function readCache(hash: string, cacheDir = DEFAULT_CACHE_DIR): Promise<CacheEntry | null> {
   const filePath = path.join(cacheDir, `${hash}.json`)
