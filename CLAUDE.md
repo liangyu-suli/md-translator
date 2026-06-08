@@ -9,7 +9,11 @@ A local web app that reads a markdown file by path, stores it, and displays Engl
 
 ## Stack
 
-- To be determined during design
+- **Framework**: Next.js 16 (App Router), TypeScript
+- **Styling**: Tailwind CSS
+- **Translation**: Gemini API (`gemini-3.1-flash-lite`) via `@google/generative-ai`
+- **Cache**: Disk-based JSON in `translations/` dir, keyed by SHA-256 hash
+- **Testing**: Jest + @testing-library/react
 
 ## Key Behaviors
 
