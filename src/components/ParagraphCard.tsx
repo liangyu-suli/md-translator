@@ -1,5 +1,7 @@
 'use client'
 
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { DisplayMode } from './ModeToolbar'
 
 export interface ParagraphState {
@@ -50,14 +52,14 @@ export function ParagraphCard({ paragraph, mode, onRetry }: ParagraphCardProps) 
   return (
     <div className={`grid gap-4 ${mode === 'hybrid' ? 'grid-cols-2' : 'grid-cols-1'}`}>
       {(mode === 'hybrid' || mode === 'en') && (
-        <p className="text-gray-800 font-mono text-sm leading-relaxed whitespace-pre-wrap">
-          {paragraph.en}
-        </p>
+        <div className="prose prose-sm max-w-none text-gray-800">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph.en}</ReactMarkdown>
+        </div>
       )}
       {(mode === 'hybrid' || mode === 'zh') && (
-        <p className="text-gray-800 text-sm leading-relaxed">
-          {paragraph.zh}
-        </p>
+        <div className="prose prose-sm max-w-none text-gray-800">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{paragraph.zh}</ReactMarkdown>
+        </div>
       )}
     </div>
   )

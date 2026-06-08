@@ -16,18 +16,18 @@ test('filters empty strings', () => {
   ])
 })
 
-test('marks headings as no-translate', () => {
+test('translates headings', () => {
   const result = splitParagraphs('# Title\n\nSome text')
   expect(result).toEqual([
-    { en: '# Title', shouldTranslate: false },
+    { en: '# Title', shouldTranslate: true },
     { en: 'Some text', shouldTranslate: true },
   ])
 })
 
-test('marks ## headings as no-translate', () => {
+test('translates ## headings', () => {
   const result = splitParagraphs('## Section\n\nBody text')
   expect(result).toEqual([
-    { en: '## Section', shouldTranslate: false },
+    { en: '## Section', shouldTranslate: true },
     { en: 'Body text', shouldTranslate: true },
   ])
 })

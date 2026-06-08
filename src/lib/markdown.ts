@@ -12,5 +12,5 @@ export function splitParagraphs(content: string): Paragraph[] {
 }
 
 function isNonTranslatable(p: string): boolean {
-  return /^#{1,6}\s/.test(p) || /^-{3,}$/.test(p) || p.startsWith('```')
+  return /^-{3,}$/.test(p) || p.startsWith('```')
 }

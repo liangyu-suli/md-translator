@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 const PROMPT_PREFIX =
   'Translate the following English text to Chinese. ' +
   'Preserve all technical terms, code, variable names, and jargon exactly as written. ' +
+  'Preserve all markdown formatting exactly (bold, italic, headings, inline code, bullet points, etc). ' +
   'Return only the Chinese translation, no explanation.\n\n'
 
 export async function translateParagraph(text: string, apiKey: string): Promise<string> {
