@@ -45,6 +45,7 @@ test('captures per-paragraph errors without throwing', async () => {
   expect(results).toHaveLength(2)
   const failed = results.find(r => r.en === 'Fail this')!
   expect(failed.error).toBe('quota')
+  expect(failed.zh).toBe('Fail this')
   const succeeded = results.find(r => r.en === 'Succeed this')!
   expect(succeeded.zh).toBe('ZH:Succeed this')
 })

@@ -26,7 +26,7 @@ export async function translateParagraphs(
         onResult({
           index,
           en: para.en,
-          zh: '',
+          zh: para.en,
           error: err instanceof Error ? err.message : 'Translation failed',
         })
       }
