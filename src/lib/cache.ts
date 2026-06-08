@@ -20,8 +20,9 @@ export async function readCache(hash: string, cacheDir = DEFAULT_CACHE_DIR): Pro
   try {
     const content = await fs.readFile(filePath, 'utf8')
     return JSON.parse(content) as CacheEntry
-  } catch {
-    return null
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw err
   }
 }
 

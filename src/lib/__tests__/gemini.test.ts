@@ -17,7 +17,8 @@ test('returns the translated Chinese text', async () => {
 
 test('passes the model name gemini-3.1-flash-lite', async () => {
   const { GoogleGenerativeAI } = require('@google/generative-ai')
-  const mockInstance = GoogleGenerativeAI.mock.results[0].value
+  await translateParagraph('Test text', 'fake-api-key')
+  const mockInstance = GoogleGenerativeAI.mock.results[GoogleGenerativeAI.mock.results.length - 1].value
   expect(mockInstance.getGenerativeModel).toHaveBeenCalledWith({
     model: 'gemini-3.1-flash-lite',
   })
