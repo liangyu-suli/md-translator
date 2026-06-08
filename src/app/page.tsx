@@ -38,52 +38,67 @@ export default function HomePage() {
         return
       }
 
-      const reader = response.body!.getReader()
+      if (!response.body) {
+        setError('No response body')
+        setLoading(false)
+        return
+      }
+
+      const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
 
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const data = JSON.parse(line.slice(6))
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue
+            try {
+              const data = JSON.parse(line.slice(6))
 
-          if (data.type === 'init') {
-            setParagraphs(
-              Array.from({ length: data.count }, (_, i) => ({
-                index: i, en: '', zh: '', status: 'loading' as const,
-              }))
-            )
-          } else if (data.type === 'paragraph') {
-            setParagraphs(prev =>
-              prev.map(p =>
-                p.index === data.index
-                  ? { index: data.index, en: data.en, zh: data.zh, status: 'done' as const }
-                  : p
-              )
-            )
-          } else if (data.type === 'error') {
-            setParagraphs(prev =>
-              prev.map(p =>
-                p.index === data.index
-                  ? { index: data.index, en: data.en, zh: '', status: 'error' as const, error: data.message }
-                  : p
-              )
-            )
-          } else if (data.type === 'fatal') {
-            setError(data.message ?? 'Fatal stream error')
-            setLoading(false)
-            return
-          } else if (data.type === 'done') {
-            setLoading(false)
+              if (data.type === 'init') {
+                setParagraphs(
+                  Array.from({ length: data.count }, (_, i) => ({
+                    index: i, en: '', zh: '', status: 'loading' as const,
+                  }))
+                )
+              } else if (data.type === 'paragraph') {
+                setParagraphs(prev =>
+                  prev.map(p =>
+                    p.index === data.index
+                      ? { index: data.index, en: data.en, zh: data.zh, status: 'done' as const }
+                      : p
+                  )
+                )
+              } else if (data.type === 'error') {
+                setParagraphs(prev =>
+                  prev.map(p =>
+                    p.index === data.index
+                      ? { index: data.index, en: data.en ?? p.en, zh: '', status: 'error' as const, error: data.message }
+                      : p
+                  )
+                )
+              } else if (data.type === 'fatal') {
+                setError(data.message ?? 'Fatal stream error')
+                setLoading(false)
+                return
+              } else if (data.type === 'done') {
+                setLoading(false)
+              }
+            } catch {
+              // skip malformed SSE line
+            }
           }
         }
+      } finally {
+        setLoading(false)
+        reader.cancel()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Network error')
@@ -104,7 +119,7 @@ export default function HomePage() {
       const data = await res.json()
       if (res.ok) {
         setParagraphs(prev =>
-          prev.map(p => p.index === index ? { ...p, zh: data.zh, status: 'done' as const } : p)
+          prev.map(p => p.index === index ? { ...p, zh: data.zh, status: 'done' as const, error: undefined } : p)
         )
       } else {
         setParagraphs(prev =>
