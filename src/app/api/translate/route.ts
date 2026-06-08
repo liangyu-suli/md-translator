@@ -33,8 +33,12 @@ export async function POST(request: NextRequest) {
     } else {
       return Response.json({ error: 'Provide filePath or text' }, { status: 400 })
     }
-  } catch {
-    return Response.json({ error: `File not found: ${body.filePath}` }, { status: 404 })
+  } catch (err) {
+    const isNotFound = (err as NodeJS.ErrnoException).code === 'ENOENT'
+    if (isNotFound) {
+      return Response.json({ error: `File not found: ${body.filePath}` }, { status: 404 })
+    }
+    return Response.json({ error: `Failed to read file: ${(err as Error).message}` }, { status: 500 })
   }
 
   if (!content.trim()) {
@@ -46,44 +50,49 @@ export async function POST(request: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      if (cached) {
-        controller.enqueue(makeSSE({ type: 'init', count: cached.paragraphs.length }))
-        for (let i = 0; i < cached.paragraphs.length; i++) {
-          controller.enqueue(makeSSE({ type: 'paragraph', index: i, ...cached.paragraphs[i] }))
+      try {
+        if (cached) {
+          controller.enqueue(makeSSE({ type: 'init', count: cached.paragraphs.length }))
+          for (let i = 0; i < cached.paragraphs.length; i++) {
+            controller.enqueue(makeSSE({ type: 'paragraph', index: i, ...cached.paragraphs[i] }))
+          }
+          controller.enqueue(makeSSE({ type: 'done' }))
+          controller.close()
+          return
         }
+
+        const paragraphs = splitParagraphs(content)
+        controller.enqueue(makeSSE({ type: 'init', count: paragraphs.length }))
+
+        const results: Array<{ en: string; zh: string } | null> = new Array(paragraphs.length).fill(null)
+        let hasError = false
+
+        await translateParagraphs(paragraphs, apiKey, result => {
+          if (result.error) {
+            hasError = true
+            controller.enqueue(makeSSE({ type: 'error', index: result.index, en: result.en, message: result.error }))
+          } else {
+            results[result.index] = { en: result.en, zh: result.zh }
+            controller.enqueue(makeSSE({ type: 'paragraph', index: result.index, en: result.en, zh: result.zh }))
+          }
+        })
+
+        if (!hasError) {
+          const entry: CacheEntry = {
+            hash,
+            source: content,
+            paragraphs: results as Array<{ en: string; zh: string }>,
+            createdAt: new Date().toISOString(),
+          }
+          await writeCache(entry)
+        }
+
         controller.enqueue(makeSSE({ type: 'done' }))
         controller.close()
-        return
+      } catch (err) {
+        controller.enqueue(makeSSE({ type: 'fatal', message: err instanceof Error ? err.message : 'Internal error' }))
+        controller.close()
       }
-
-      const paragraphs = splitParagraphs(content)
-      controller.enqueue(makeSSE({ type: 'init', count: paragraphs.length }))
-
-      const results: Array<{ en: string; zh: string } | null> = new Array(paragraphs.length).fill(null)
-      let hasError = false
-
-      await translateParagraphs(paragraphs, apiKey, result => {
-        if (result.error) {
-          hasError = true
-          controller.enqueue(makeSSE({ type: 'error', index: result.index, en: result.en, message: result.error }))
-        } else {
-          results[result.index] = { en: result.en, zh: result.zh }
-          controller.enqueue(makeSSE({ type: 'paragraph', index: result.index, en: result.en, zh: result.zh }))
-        }
-      })
-
-      if (!hasError) {
-        const entry: CacheEntry = {
-          hash,
-          source: content,
-          paragraphs: results as Array<{ en: string; zh: string }>,
-          createdAt: new Date().toISOString(),
-        }
-        await writeCache(entry)
-      }
-
-      controller.enqueue(makeSSE({ type: 'done' }))
-      controller.close()
     },
   })
 
