@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
           const entry: CacheEntry = {
             hash,
             source: content,
-            paragraphs: results as Array<{ en: string; zh: string }>,
+            paragraphs: results.filter((r): r is { en: string; zh: string } => r !== null),
             createdAt: new Date().toISOString(),
           }
           await writeCache(entry)

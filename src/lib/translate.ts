@@ -8,16 +8,22 @@ export interface TranslationResult {
   error?: string
 }
 
+const CONCURRENCY = 5
+
 export async function translateParagraphs(
   paragraphs: Paragraph[],
   apiKey: string,
   onResult: (result: TranslationResult) => void
 ): Promise<void> {
-  await Promise.all(
-    paragraphs.map(async (para, index) => {
+  let next = 0
+
+  const worker = async () => {
+    while (next < paragraphs.length) {
+      const index = next++
+      const para = paragraphs[index]
       if (!para.shouldTranslate) {
         onResult({ index, en: para.en, zh: para.en })
-        return
+        continue
       }
       try {
         const zh = await translateParagraph(para.en, apiKey)
@@ -30,6 +36,10 @@ export async function translateParagraphs(
           error: err instanceof Error ? err.message : 'Translation failed',
         })
       }
-    })
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, paragraphs.length) }, worker)
   )
 }
